@@ -4,7 +4,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 
 const server = express();
-server.use(express.json(), helmet(), morgan("dev", logger));
+server.use(express.json(), helmet(), morgan("dev"), logger);
 
 server.use("/api/users", userRouter);
 
@@ -15,7 +15,9 @@ server.get("/", (req, res) => {
 //custom middleware
 
 function logger(req, res, next) {
-  console.log(`${req.method} Request`);
+  console.log(
+    `${req.method} Request to ${req.url} at [${new Date().toISOString()}]`
+  );
   next();
 }
 
