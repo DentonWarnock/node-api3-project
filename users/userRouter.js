@@ -6,10 +6,28 @@ const router = express.Router();
 
 router.use(errorHandler);
 
-router.post("/", validateUser, (req, res) => {});
+router.post("/", validateUser, (req, res) => {
+  Users.insert(req.body)
+    .then(user => {
+      res.status(201).json(user);
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
+});
 
 router.post("/:id/posts", validateUserId, validatePost, (req, res) => {
-  // do your magic!
+  const postInfo = {
+    text: req.body.text,
+    user_id: req.id
+  };
+  Posts.insert(postInfo)
+    .then(post => {
+      res.status(201).json(post);
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
 });
 
 router.get("/", (req, res) => {
@@ -23,33 +41,87 @@ router.get("/", (req, res) => {
 });
 
 router.get("/:id", validateUserId, (req, res) => {
-  // do your magic!
+  try {
+    res.status(200).json(req.user);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+
+  // Users.getUserPosts(req.id)
+  //   .then(posts => {
+  //     res.status(200).json(posts);
+  //   })
+  //   .catch(err => {
+  //     res.status(500).json(err);
+  //   });
 });
 
 router.get("/:id/posts", validateUserId, (req, res) => {
-  // do your magic!
+  Users.getUserPosts(req.id)
+    .then(posts => {
+      if (posts.length > 0) {
+        res.status(200).json(posts);
+      } else {
+        res.status(200).json("this user does not have any posts");
+      }
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
 });
 
 router.delete("/:id", validateUserId, (req, res) => {
-  // do your magic!
+  Users.remove(req.id)
+    .then(count => {
+      if (count > 0) {
+        res
+          .status(200)
+          .json(`User: ${req.user.name} removed from the database`);
+      }
+      // } else {
+      //   next("that user was not found");
+      // }
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
 });
 
 router.put("/:id", validateUserId, (req, res) => {
-  // do your magic!
+  const changes = { name: req.body.name };
+  Users.update(req.id, changes)
+    .then(count => {
+      if (count > 0) {
+        Users.getById(req.id).then(user => {
+          if (user) {
+            res.status(200).json(user);
+          }
+        });
+      }
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
 });
 
 //custom middleware
 
 function validateUserId(req, res, next) {
   const { id } = req.params;
-  Users.getById(id).then(user => {
-    if (user) {
-      req.user = user;
-      next();
-    } else {
-      next("User does not exist");
-    }
-  });
+  Users.getById(id)
+    .then(user => {
+      if (user) {
+        req.user = user;
+        req.id = id;
+        next();
+      } else {
+        next("User does not exist!!!!");
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ message: "execption", err });
+    });
 }
 
 function validateUser(req, res, next) {
