@@ -1,11 +1,20 @@
 const express = require("express");
-const Users = require("./postDb");
-const Posts = require("../users/userDb");
+const Posts = require("./postDb");
+const Users = require("../users/userDb");
 
 const router = express.Router();
 
+router.use(errorHandler);
+
 router.get("/", (req, res) => {
   // do your magic!
+  Posts.get()
+    .then(posts => {
+      res.status(200).json(posts);
+    })
+    .catch(err => {
+      res.status(500).json(err.message);
+    });
 });
 
 router.get("/:id", (req, res) => {
@@ -24,6 +33,11 @@ router.put("/:id", (req, res) => {
 
 function validatePostId(req, res, next) {
   // do your magic!
+}
+
+function errorHandler(error, req, res, next) {
+  console.log("error: ", error);
+  res.status(400).json({ message: error });
 }
 
 module.exports = router;

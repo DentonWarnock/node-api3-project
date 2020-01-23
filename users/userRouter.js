@@ -12,7 +12,7 @@ router.post("/", validateUser, (req, res) => {
       res.status(201).json(user);
     })
     .catch(err => {
-      res.status(500).json(err);
+      res.status(500).json(err.message);
     });
 });
 
@@ -26,7 +26,7 @@ router.post("/:id/posts", validateUserId, validatePost, (req, res) => {
       res.status(201).json(post);
     })
     .catch(err => {
-      res.status(500).json(err);
+      res.status(500).json(err.message);
     });
 });
 
@@ -36,7 +36,7 @@ router.get("/", (req, res) => {
       res.status(200).json(users);
     })
     .catch(err => {
-      res.status(500).json(err);
+      res.status(500).json(err.message);
     });
 });
 
@@ -44,16 +44,8 @@ router.get("/:id", validateUserId, (req, res) => {
   try {
     res.status(200).json(req.user);
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json(err.message);
   }
-
-  // Users.getUserPosts(req.id)
-  //   .then(posts => {
-  //     res.status(200).json(posts);
-  //   })
-  //   .catch(err => {
-  //     res.status(500).json(err);
-  //   });
 });
 
 router.get("/:id/posts", validateUserId, (req, res) => {
@@ -66,7 +58,7 @@ router.get("/:id/posts", validateUserId, (req, res) => {
       }
     })
     .catch(err => {
-      res.status(500).json(err);
+      res.status(500).json(err.message);
     });
 });
 
@@ -78,12 +70,9 @@ router.delete("/:id", validateUserId, (req, res) => {
           .status(200)
           .json(`User: ${req.user.name} removed from the database`);
       }
-      // } else {
-      //   next("that user was not found");
-      // }
     })
     .catch(err => {
-      res.status(500).json(err);
+      res.status(500).json(err.message);
     });
 });
 
@@ -100,7 +89,7 @@ router.put("/:id", validateUserId, (req, res) => {
       }
     })
     .catch(err => {
-      res.status(500).json(err);
+      res.status(500).json(err.message);
     });
 });
 
