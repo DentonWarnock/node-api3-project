@@ -76,7 +76,10 @@ router.delete("/:id", validateUserId, (req, res) => {
     });
 });
 
-router.put("/:id", validateUserId, (req, res) => {
+router.put("/:id", validateUserId, (req, res, next) => {
+  if (!req.body.name || req.body.name == "") {
+    next("required name field is missing");
+  }
   const changes = { name: req.body.name };
   Users.update(req.id, changes)
     .then(count => {
