@@ -4,8 +4,6 @@ const Users = require("../users/userDb");
 
 const router = express.Router();
 
-router.use(errorHandler);
-
 router.get("/", (req, res) => {
   Posts.get()
     .then(posts => {
@@ -43,19 +41,20 @@ router.delete("/:id", validatePostId, (req, res) => {
 router.put("/:id", validatePostId, (req, res, next) => {
   if (!req.body.text) {
     next("required text field is missing");
+  } else {
+    const changes = { text: req.body.text };
+    Posts.update(req.id, changes)
+      .then(count => {
+        if (count > 0) {
+          Posts.getById(req.id).then(post => {
+            res.status(200).json(post);
+          });
+        }
+      })
+      .catch(err => {
+        res.status(500).json(err.message);
+      });
   }
-  const changes = { text: req.body.text };
-  Posts.update(req.id, changes)
-    .then(count => {
-      if (count > 0) {
-        Posts.getById(req.id).then(post => {
-          res.status(200).json(post);
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).json(err.message);
-    });
 });
 
 // custom middleware
@@ -81,5 +80,7 @@ function errorHandler(error, req, res, next) {
   console.log("error: ", error);
   res.status(400).json({ message: error });
 }
+
+router.use(errorHandler);
 
 module.exports = router;

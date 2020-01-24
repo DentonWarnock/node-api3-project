@@ -4,8 +4,6 @@ const Posts = require("../posts/postDb");
 
 const router = express.Router();
 
-router.use(errorHandler);
-
 router.post("/", validateUser, (req, res) => {
   Users.insert(req.body)
     .then(user => {
@@ -79,21 +77,22 @@ router.delete("/:id", validateUserId, (req, res) => {
 router.put("/:id", validateUserId, (req, res, next) => {
   if (!req.body.name || req.body.name == "") {
     next("required name field is missing");
+  } else {
+    const changes = { name: req.body.name };
+    Users.update(req.id, changes)
+      .then(count => {
+        if (count > 0) {
+          Users.getById(req.id).then(user => {
+            if (user) {
+              res.status(200).json(user);
+            }
+          });
+        }
+      })
+      .catch(err => {
+        res.status(500).json(err.message);
+      });
   }
-  const changes = { name: req.body.name };
-  Users.update(req.id, changes)
-    .then(count => {
-      if (count > 0) {
-        Users.getById(req.id).then(user => {
-          if (user) {
-            res.status(200).json(user);
-          }
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).json(err.message);
-    });
 });
 
 //custom middleware
@@ -140,5 +139,7 @@ function errorHandler(error, req, res, next) {
   console.log("error: ", error);
   res.status(400).json({ message: error });
 }
+
+router.use(errorHandler);
 
 module.exports = router;
